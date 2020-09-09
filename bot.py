@@ -2,7 +2,7 @@ import discord
 import aiofiles
 from os import path, remove
 from re import search
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 from nudenet import NudeClassifier
 from config import API_TOKEN
 
@@ -22,8 +22,9 @@ def get_filename(name):
 
 # Downloads a request from an embed
 async def save_embed(url, path):
+    timeout = ClientTimeout(total=0.5)
     async with ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(url, timeout=timeout) as response:
             async with aiofiles.open(path, 'wb') as file:
                 await file.write(await response.read())
 
@@ -46,13 +47,16 @@ async def on_message(message):
             await attachment.save(path)
 
     # Checks if a token is an image url
-    regex = r'https?:(?:%|\/|.|\w|-)*\.(?:jpg|gif|png|jpeg)(?:\?(?:\w|=|&|%)+?)?'
+    regex = r'https?:(?:%|\/|\.|\w|-)*\.(?:jpg|gif|png|jpeg)(?:\?(?:\w|=|&|%)+?)?'
+    print(message.content.split(" "))
     urls = [url for url in message.content.split(" ") if search(regex, url)]
     for url in urls:
+        print(url)
         path = get_filename(url.split("/")[-1])
         filenames.append(path)
         await save_embed(url, path)
 
+    
     for file in filenames:
         prob = classfier.classify(file)[file]
         if prob['unsafe'] >= THRESHOLD:
