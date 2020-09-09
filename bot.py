@@ -9,6 +9,8 @@ from config import API_TOKEN
 classfier = NudeClassifier()
 client = discord.Client()
 
+THRESHOLD = .90
+
 # Add numbers to duplicately named files to save them to different files
 def get_filename(name):
     filename = f'images/{name}' + "0"
@@ -52,7 +54,11 @@ async def on_message(message):
         await save_embed(url, path)
 
     for file in filenames:
-        await message.channel.send(classfier.classify(file))
+        prob = classfier.classify(file)[file]
+        if prob['unsafe'] >= THRESHOLD:
+            await message.channel.send(f'Sorry {message.author.mention}')
+            await message.delete()
+
         remove(file)
 
 client.run(API_TOKEN)
