@@ -1,10 +1,11 @@
 import discord
 import aiofiles
-from os import path, remove
+from os import path, remove, environ
 from re import search
 from aiohttp import ClientSession, ClientTimeout
 from nudenet import NudeClassifier
-from config import API_TOKEN
+
+API_TOKEN = environ.get('API_TOKEN')
 
 classfier = NudeClassifier()
 client = discord.Client()
