@@ -1,0 +1,5 @@
+aiohttp==3.6.2
+discord.py==1.4.1
+Keras==2.4.3
+NudeNet==2.0.3
+tensorflow==2.3.0
