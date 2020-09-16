@@ -67,6 +67,7 @@ async def on_message(message):
         
     prob = classfier.classify(filenames)
     unsafe_chance = max([v['unsafe'] for v in prob])
+    print(unsafe_chance)
     if unsafe_chance >= THRESHOLD:
         await message.channel.send(f'Sorry {message.author.mention}')
         await message.delete()
