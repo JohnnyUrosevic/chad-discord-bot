@@ -1,6 +1,6 @@
 import discord
 import aiofiles
-from os import path, remove, environ
+from os import path, remove, environ, mkdir
 from re import search
 from aiohttp import ClientSession, ClientTimeout
 from lite import NudeClassifier
@@ -34,6 +34,10 @@ async def save_embed(url, path):
 
 @client.event
 async def on_ready():
+    try:
+        mkdir('images')
+    except FileExistsError:
+        print('Using existing images directory')
     print('We have logged in as {0.user}'.format(client))
 
 @client.event
