@@ -62,6 +62,9 @@ async def on_message(message):
         filenames.append(path)
         await save_embed(url, path)
 
+    if not filenames:
+        return
+        
     prob = classfier.classify(filenames)
     unsafe_chance = max([v['unsafe'] for v in prob])
     if unsafe_chance >= THRESHOLD:
