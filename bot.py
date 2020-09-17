@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import aiofiles
 from os import path, remove, environ, mkdir
 from re import search
@@ -8,9 +9,10 @@ from lite import NudeClassifier
 API_TOKEN = environ.get('API_TOKEN')
 
 classfier = NudeClassifier()
-client = discord.Client()
+client = commands.Bot(commands.when_mentioned)
 
-THRESHOLD = .90
+# TODO: this should be server specific
+threshold = .80
 
 # Add numbers to duplicately named files to save them to different files
 def get_filename(name):
@@ -63,16 +65,28 @@ async def on_message(message):
         await save_embed(url, path)
 
     if not filenames:
+        await client.process_commands(message)
         return
-        
+
     prob = classfier.classify(filenames)
     unsafe_chance = max([v['unsafe'] for v in prob])
     print(unsafe_chance)
-    if unsafe_chance >= THRESHOLD:
+    if unsafe_chance >= threshold:
         await message.channel.send(f'Sorry {message.author.mention}')
         await message.delete()
 
     for file in filenames:
         remove(file)
+        
+@client.command(name="threshold")
+@commands.has_permissions(administrator=True)
+async def change_threshold(ctx, new: float):
+    """Changes the threshold for what is considered a nude."""
+    if new < .50 or new > 1.0:
+        await ctx.send(f'The threshold must be a value between .5 and 1.0')
+        return
+
+    threshold = new
+    await ctx.send(f'Changed the detection threshold to {int(threshold * 100)}%')
 
 client.run(API_TOKEN)
